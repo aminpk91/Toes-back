@@ -1,0 +1,58 @@
+version: "3.7"
+services:
+  toest_web:
+    build: .
+    command: >
+      ash -c "python manage.py migrate &&  gunicorn Toest.wsgi:application --bind 0.0.0.0:8888"
+    volumes:
+      - static:/Toest/static
+      - media:/Toest/static/media
+      - .:/Toest/
+#    ports:
+#      - 8888:9090
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres_db
+  postgres_db:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=toest
+      - POSTGRES_PASSWORD=poi;lkOOPOI
+      - POSTGRES_DB=toest
+  nginx:
+    build: ./nginx
+    volumes:
+      - static:/Toest/static
+      - media:/Toest/static/media
+      - ./nginx/config/:/etc/nginx/conf.d/
+    ports:
+      - 8080:80
+    depends_on:
+      - toest_web
+#  redis:
+#    image: redis:alpine
+#    volumes:
+#      - redis_val:/data
+#  celery:
+#
+#    restart: always
+#    build:
+#      context: .
+#      dockerfile: dokckerfile-name-alternative
+#      args:
+#        name : ashkan
+#    command: >
+#      ash -c "touch celery.log &&  celery -A BiaBegard worker -l info &> celery.log"
+#    volumes:
+#      - .:/Toest
+#    depends_on:
+#      - 
+#      - redis
+volumes:
+  postgres_data:
+  static:
+  media:
+#  redis_val:
